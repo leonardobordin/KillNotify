@@ -20,17 +20,17 @@ Permitir que a pessoa configure períodos semanais de entrega por aplicativo And
 - Seleção ampla de apps pode requerer `QUERY_ALL_PACKAGES`; explicar esse acesso na tela de privacidade. Apps sem launcher, apps de sistema, perfis de trabalho e aparelhos de pouca memória têm cobertura limitada a validar.
 - Guardar localmente regras, pacotes selecionados, hash de chave do sistema pendente e contagem de resumo. Rótulos vêm do PackageManager e não são persistidos. Nunca guardar conteúdo, pessoas, chaves brutas ou tokens de ações.
 - Exportar/importar backup JSON versionado com configurações somente. Validar o arquivo inteiro antes de aplicar; app ausente não bloqueia e gera aviso.
-- Interface inicial em pt-BR; início/status, seleção e programação por app, exceções, privacidade e backup. Cor de destaque inicial `#4F46E5`, Material 3 e temas claro/escuro/AMOLED.
-- Interface disponível em inglês, português do Brasil, espanhol, francês, alemão, italiano, japonês e chinês simplificado. Por padrão, seguir o idioma do aparelho; permitir escolha manual persistida em Configurações.
+- Interface oferece inglês, pt-BR, espanhol, francês, alemão, italiano, japonês e chinês simplificado; segue o idioma do aparelho por padrão e permite escolha manual persistida em Configurações. Inclui início/status, seleção e programação por app, exceções, privacidade e backup. Cor de destaque inicial `#4F46E5`, Material 3 e temas claro/escuro/AMOLED.
 - Repositório público apresenta README e changelog em inglês e português do Brasil, com links entre as versões.
 - A pessoa pode escolher a cor de destaque entre seis opções e personalizar uma cor por HEX ou canais RGB. A escolha é local, se aplica aos temas do app e acompanha o backup de configurações; backups antigos usam `#4F46E5`.
 - Na lista de apps, os que estão habilitados para o filtro (`selected`) aparecem primeiro; cada grupo permanece em ordem alfabética e respeita a busca.
 - O editor de períodos permite selecionar vários dias da semana em ordem domingo a sábado (`D-S-T-Q-Q-S-S`) e aplica o mesmo horário a cada dia marcado.
 - Diálogos e seletores de data/hora respeitam as superfícies AMOLED; campos de entrada têm contorno visível nos estados de foco e repouso.
-- A interface fica em português do Brasil, inclusive nos seletores Material, mesmo quando o Android está configurado em outro idioma.
+- Datas e seletores Material respeitam o idioma selecionado.
 - A aba Configurações reúne atalho de acesso às notificações, aparência, privacidade e backup. No Início, o aviso de acesso e o controle “Ativar filtro” aparecem em cartões separados.
 - O ícone Android usa o K neon enviado pelo usuário, com sino no alto à esquerda e relógio/linhas de notificação embaixo à direita. Somente as bordas externas pretas, fora do tile neon arredondado, ficam transparentes; o fundo escuro dentro do tile permanece opaco. Adaptativo, legado e monocromático mantêm a mesma composição. Não reutilizar QR, código de barras, moldura de leitura nem o arquivo integral do ícone KillQR.
-- Distribuição e instruções de instalação manual por GitHub. Nenhuma publicação de release nesta implementação.
+- Distribuição por GitHub; ainda não há release publicada nesta implementação.
+- O GitHub Actions publica automaticamente um APK assinado, checksum SHA-256 e notas do changelog quando uma tag `vMAJOR.MINOR.PATCH` compatível é enviada; exige os secrets de assinatura e passa por geração l10n, formatação, análise e testes.
 - Buscar automaticamente uma vez por dia a release estável de `leonardobordin/KillNotify` quando a opção estiver ligada; oferecer busca manual, adiar lembrete e desligar busca automática.
 - Comparar a versão semântica da release com o app instalado. Quando houver atualização, mostrar versão e notas, e abrir o APK/release do GitHub por ação da pessoa. A instalação final permanece confirmada pelo Android; nunca instalar silenciosamente.
 - A consulta envia apenas a requisição da versão à API pública do GitHub. Não enviar regras, lista de apps, notificações, identificadores ou telemetria; informar que o GitHub recebe metadados normais de conexão, como endereço IP.

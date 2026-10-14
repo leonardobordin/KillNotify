@@ -192,3 +192,13 @@ Acrescente decisões ao final; mudanças devem substituir explicitamente a anter
 - Alternativas consideradas: traduzir somente README (não cobre o pedido de interface) ou manter pt-BR forçado.
 - Efeito: todas as mensagens do app, incluindo erros, datas, diálogos e atualizações, usam `AppLocalizations`; preferência de idioma fica local e fora do backup de regras.
 - Origem: pedido do usuário e comparação com a experiência multilíngue do KillQR.
+
+## D020 — Publicação automática de releases pelo GitHub Actions
+
+- Estado: confirmada pelo usuário
+- Data: 2026-10-14
+- Contexto: o usuário pediu que a release do KillNotify fosse automática como no KillQR; o workflow existente já era acionado por tag, mas não executava todas as verificações nem extraía notas versionadas do changelog.
+- Decisão: manter o acionamento por tags `vMAJOR.MINOR.PATCH`; gerar localizações, conferir formatação, analisar e rodar testes antes do build; validar tag e versões do app; assinar somente com os quatro secrets `KILLNOTIFY_ANDROID_*`; anexar APK, SHA-256 e notas do changelog da versão.
+- Alternativas consideradas: publicar APK com chave debug; gerar apenas notas automáticas a partir de PRs; automatizar instalação no aparelho.
+- Efeito: cada tag válida produz uma GitHub Release quando o workflow conclui, sem publicar nesta alteração. A chave e as senhas permanecem como secrets fora do repositório; não criar tag nem release faz parte deste pedido.
+- Origem: pedido do usuário para espelhar o workflow de release do KillQR e instruções de distribuição/assinatura do repositório.

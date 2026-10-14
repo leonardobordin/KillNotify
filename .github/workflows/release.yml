@@ -1,4 +1,4 @@
-name: Publicar APK Android
+name: Release Android APK
 
 on:
   push:
@@ -10,44 +10,48 @@ permissions:
 
 jobs:
   release:
-    name: Compilar e publicar APK assinado
+    name: Build and publish Android release
     runs-on: ubuntu-latest
     steps:
-      - name: Baixar o código
+      - name: Check out source
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Configurar Java
+      - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Configurar Flutter
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: '3.47.2'
           cache: true
 
-      - name: Instalar dependências
+      - name: Install dependencies
         run: flutter pub get --enforce-lockfile
 
-      - name: Analisar projeto
+      - name: Generate localizations
+        run: flutter gen-l10n
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analyze
         run: flutter analyze
 
-      - name: Compilar APK assinado e checksum
-        id: package
-        shell: bash
+      - name: Test
+        run: flutter test
+
+      - name: Prepare release signing key
         env:
           KEYSTORE_BASE64: ${{ secrets.KILLNOTIFY_ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KILLNOTIFY_ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KILLNOTIFY_ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KILLNOTIFY_ANDROID_KEY_PASSWORD }}
-          ORG_GRADLE_PROJECT_killnotifyReleaseStorePassword: ${{ secrets.KILLNOTIFY_ANDROID_KEYSTORE_PASSWORD }}
-          ORG_GRADLE_PROJECT_killnotifyReleaseKeyAlias: ${{ secrets.KILLNOTIFY_ANDROID_KEY_ALIAS }}
-          ORG_GRADLE_PROJECT_killnotifyReleaseKeyPassword: ${{ secrets.KILLNOTIFY_ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
           for value in "$KEYSTORE_BASE64" "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD"; do
@@ -57,6 +61,23 @@ jobs:
             fi
           done
 
+          keystore_path="$RUNNER_TEMP/killnotify-release.jks"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
+          if [ ! -s "$keystore_path" ]; then
+            echo '::error::The configured Android keystore secret is empty or invalid.'
+            exit 1
+          fi
+
+      - name: Build signed APK and checksum
+        id: package
+        shell: bash
+        env:
+          ORG_GRADLE_PROJECT_killnotifyReleaseKeystore: ${{ runner.temp }}/killnotify-release.jks
+          ORG_GRADLE_PROJECT_killnotifyReleaseStorePassword: ${{ secrets.KILLNOTIFY_ANDROID_KEYSTORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_killnotifyReleaseKeyAlias: ${{ secrets.KILLNOTIFY_ANDROID_KEY_ALIAS }}
+          ORG_GRADLE_PROJECT_killnotifyReleaseKeyPassword: ${{ secrets.KILLNOTIFY_ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
           version_name="$(sed -nE 's/^version: ([0-9]+\.[0-9]+\.[0-9]+)\+[0-9]+$/\1/p' pubspec.yaml)"
           build_number="$(sed -nE 's/^version: [0-9]+\.[0-9]+\.[0-9]+\+([0-9]+)$/\1/p' pubspec.yaml)"
           app_version="$(sed -nE "s/.*version = '([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/p" lib/core/version/app_release.dart)"
@@ -70,9 +91,6 @@ jobs:
             exit 1
           fi
 
-          keystore_path="$RUNNER_TEMP/killnotify-release.jks"
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
-          export ORG_GRADLE_PROJECT_killnotifyReleaseKeystore="$keystore_path"
           flutter build apk --release --dart-define=GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
 
           mkdir -p dist
@@ -82,13 +100,28 @@ jobs:
           echo "version_name=$version_name" >> "$GITHUB_OUTPUT"
           echo "build_number=$build_number" >> "$GITHUB_OUTPUT"
 
-      - name: Publicar GitHub Release
+      - name: Prepare release notes
+        shell: bash
+        env:
+          VERSION_NAME: ${{ steps.package.outputs.version_name }}
+        run: |
+          set -euo pipefail
+          awk -v version="$VERSION_NAME" '
+            index($0, "## " version " - ") == 1 { capture=1; print; next }
+            capture && index($0, "## ") == 1 { exit }
+            capture { print }
+          ' CHANGELOG.md > dist/release-notes.md
+          if [ ! -s dist/release-notes.md ]; then
+            echo "KillNotify $VERSION_NAME" > dist/release-notes.md
+          fi
+
+      - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
             --verify-tag \
             --title "KillNotify ${{ steps.package.outputs.version_name }}" \
-            --generate-notes \
+            --notes-file dist/release-notes.md \
             "dist/KillNotify-${{ steps.package.outputs.version_name }}.apk" \
             "dist/KillNotify-${{ steps.package.outputs.version_name }}.sha256"

@@ -67,6 +67,7 @@ O tema Material 3 usa a cor de destaque escolhida como seed e cor primária, cal
 
 ## Plataforma e validação
 
+- `.github/workflows/release.yml` dispara com tags `vMAJOR.MINOR.PATCH`; gera localizações, confere formatação, analisa e roda testes antes de compilar um APK assinado com secrets do GitHub. A release inclui checksum SHA-256 e as notas da versão em `CHANGELOG.md`; sem a assinatura configurada, a publicação falha.
 - `minSdk 26`, pois `snoozeNotification` foi introduzido na API 26. No manifesto, o listener usa `BIND_NOTIFICATION_LISTENER_SERVICE` e `exported=false`.
 - `QUERY_ALL_PACKAGES` atende seleção ampla; a tela de privacidade informa o efeito. Rótulos são lidos localmente.
 - `INTERNET` é usada somente pelo verificador opcional de releases do GitHub; não solicitamos `POST_NOTIFICATIONS` nem alarmes exatos e não publicamos na Play Store.
