@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/app_controller.dart';
 import '../version/app_release.dart';
+import '../../l10n/app_localizations.dart';
 
 enum ReleaseUpdateError { network, invalidResponse }
 
@@ -198,8 +199,8 @@ Future<void> checkForUpdates({
       showDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const AlertDialog(
-          title: Text('Buscando atualizações'),
+        builder: (context) => AlertDialog(
+          title: Text(AppLocalizations.of(context)!.checkingUpdates),
           content: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -208,7 +209,9 @@ Future<void> checkForUpdates({
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
               SizedBox(width: 14),
-              Flexible(child: Text('Consultando o GitHub…')),
+              Flexible(
+                child: Text(AppLocalizations.of(context)!.consultingGithub),
+              ),
             ],
           ),
         ),
@@ -229,7 +232,7 @@ Future<void> checkForUpdates({
           result.release!,
         );
         if (!opened && context.mounted) {
-          _showMessage(context, 'Não foi possível abrir o download.');
+          _showMessage(context, AppLocalizations.of(context)!.updateOpenFailed);
         }
       case _UpdateAction.later:
         await controller.snoozeUpdateChecks();
@@ -242,11 +245,12 @@ Future<void> checkForUpdates({
   }
 
   if (automatic) return;
+  final l10n = AppLocalizations.of(context)!;
   final message = result.noReleasePublished
-      ? 'Ainda não há uma versão publicada no GitHub.'
+      ? l10n.noReleasePublished
       : result.error != null
-      ? 'Não foi possível buscar atualizações agora.'
-      : 'Você já está usando a versão mais recente.';
+      ? l10n.updateCheckFailed
+      : l10n.alreadyLatestVersion;
   _showMessage(context, message);
 }
 
@@ -257,7 +261,7 @@ Future<_UpdateAction?> _showUpdateAvailable(
   context: context,
   barrierDismissible: false,
   builder: (dialogContext) => AlertDialog(
-    title: const Text('Atualização disponível'),
+    title: Text(AppLocalizations.of(dialogContext)!.updateAvailable),
     content: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 460),
       child: SingleChildScrollView(
@@ -265,7 +269,10 @@ Future<_UpdateAction?> _showUpdateAvailable(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('A versão ${release.version} está disponível.'),
+            Text(
+              AppLocalizations.of(dialogContext)!
+                  .versionAvailable(release.version),
+            ),
             if (release.title.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
@@ -275,14 +282,12 @@ Future<_UpdateAction?> _showUpdateAvailable(
             ],
             if (release.body.isNotEmpty) ...[
               const SizedBox(height: 12),
-              const Text('Notas da versão'),
+              Text(AppLocalizations.of(dialogContext)!.releaseNotes),
               const SizedBox(height: 4),
               Text(release.body),
             ],
             const SizedBox(height: 12),
-            const Text(
-              'O download será aberto no navegador. O Android pedirá confirmação para instalar.',
-            ),
+            Text(AppLocalizations.of(dialogContext)!.updateInstallConfirmation),
           ],
         ),
       ),
@@ -290,15 +295,15 @@ Future<_UpdateAction?> _showUpdateAvailable(
     actions: [
       TextButton(
         onPressed: () => Navigator.pop(dialogContext, _UpdateAction.never),
-        child: const Text('Não lembrar novamente'),
+        child: Text(AppLocalizations.of(dialogContext)!.neverRemind),
       ),
       TextButton(
         onPressed: () => Navigator.pop(dialogContext, _UpdateAction.later),
-        child: const Text('Lembrar amanhã'),
+        child: Text(AppLocalizations.of(dialogContext)!.remindTomorrow),
       ),
       FilledButton(
         onPressed: () => Navigator.pop(dialogContext, _UpdateAction.download),
-        child: const Text('Baixar atualização'),
+        child: Text(AppLocalizations.of(dialogContext)!.downloadUpdate),
       ),
     ],
   ),

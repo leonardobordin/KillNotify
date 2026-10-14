@@ -8,6 +8,7 @@ O MVP usa Flutter feature-first e um serviço nativo Kotlin. O listener comparti
 
 - `lib/app`: navegação e ciclo de vida da interface.
 - `lib/core/native`: cliente do contrato Flutter–Kotlin v1; `lib/core/theme`: Material 3 e temas.
+- `lib/l10n`: ARB de oito idiomas; `AppLocalizations` gerado pelo Flutter. A escolha `system`/idioma explícito fica em preferência local, separada das regras e do backup.
 - `lib/core/update`: consulta limitada a `GET https://api.github.com/repos/leonardobordin/KillNotify/releases/latest`, comparação semântica de versão, preferência local e abertura do asset/release no navegador. A interface não instala APK diretamente.
 - `lib/features`: início/status, seleção e editor de apps, exceções e configurações (acesso, aparência, privacidade e backup). O aviso de acesso na tela inicial fica separado do controle de ativação. A tela de aparência oferece presets de cor e seleção HEX/RGB; o editor de períodos apresenta os dias em uma faixa multi-seleção e expande a escolha para intervalos por dia. Na lista, Dart ordena visualmente os pacotes habilitados (`selected=true`) antes dos demais, com ordem alfabética estável por rótulo/pacote e filtro de busca aplicado antes da exibição. Dart apresenta e edita dados; não decide se uma notificação é permitida.
 - `android/app/.../domain/WeeklySchedule.kt`: validação, normalização, janelas efetivas, decisão do momento e próximo início.
@@ -58,9 +59,11 @@ Em transição de horário de verão, `LocalDateTime.atZone` avança horários i
 
 `configuration_v1` guarda regra, seleção, categoria, prazo, tema e cor de destaque. O backup inclui a cor em `accentColor`; esse campo é opcional ao importar schema v1 existente e assume `#4F46E5` quando ausente. `pending_snoozed_metadata_v1` guarda somente hash/pacote/prazo; a contagem do dia também fica local. Nenhum desses metadados temporários vai para o backup. Pacotes ausentes são preservados e avisados. Se o backup pedir filtro ativo mas o acesso ao listener ou a isenção de bateria estiver ausente, a importação mantém o filtro desligado e informa o pré-requisito pendente.
 
+A preferência de idioma e as preferências do verificador do GitHub ficam no armazenamento local do Flutter e não são incluídas no backup versionado das regras.
+
 O tema Material 3 usa a cor de destaque escolhida como seed e cor primária, calculando primeiro plano com contraste. O ícone adaptativo usa o raster K/sino/relógio enviado pelo usuário; o alpha externo revela o fundo do launcher, enquanto o interior escuro do tile permanece opaco. O asset legado usa a mesma imagem redimensionada, e o ícone monocromático vetorial conserva K, sino, relógio e linhas. A marca não muda com a cor escolhida no app.
 
-`AppTheme` centraliza `DialogThemeData`, `DatePickerThemeData`, `TimePickerThemeData`, menus e bordas de `InputDecorationTheme`; a variante AMOLED força os fundos de diálogo a preto. O `MaterialApp` fixa a localidade `pt_BR` via `flutter_localizations`, então os seletores Material não herdam rótulos em inglês do sistema. A seleção D-S-T-Q-Q-S-S é somente de apresentação: `AppRulePage` salva um `ScheduleInterval` para cada índice Kotlin correspondente (UI domingo→sábado; modelo nativo segunda=0 a domingo=6).
+`AppTheme` centraliza `DialogThemeData`, `DatePickerThemeData`, `TimePickerThemeData`, menus e bordas de `InputDecorationTheme`; a variante AMOLED força os fundos de diálogo a preto. O `MaterialApp` carrega `AppLocalizations` para inglês, pt-BR, espanhol, francês, alemão, italiano, japonês e chinês simplificado; segue o locale do sistema por padrão e aceita uma escolha local em Configurações. A seleção semanal exibe uma inicial localizada de cada dia; ela é somente de apresentação: `AppRulePage` salva um `ScheduleInterval` para cada índice Kotlin correspondente (UI domingo→sábado; modelo nativo segunda=0 a domingo=6).
 
 ## Plataforma e validação
 

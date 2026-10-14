@@ -21,6 +21,8 @@ Permitir que a pessoa configure períodos semanais de entrega por aplicativo And
 - Guardar localmente regras, pacotes selecionados, hash de chave do sistema pendente e contagem de resumo. Rótulos vêm do PackageManager e não são persistidos. Nunca guardar conteúdo, pessoas, chaves brutas ou tokens de ações.
 - Exportar/importar backup JSON versionado com configurações somente. Validar o arquivo inteiro antes de aplicar; app ausente não bloqueia e gera aviso.
 - Interface inicial em pt-BR; início/status, seleção e programação por app, exceções, privacidade e backup. Cor de destaque inicial `#4F46E5`, Material 3 e temas claro/escuro/AMOLED.
+- Interface disponível em inglês, português do Brasil, espanhol, francês, alemão, italiano, japonês e chinês simplificado. Por padrão, seguir o idioma do aparelho; permitir escolha manual persistida em Configurações.
+- Repositório público apresenta README e changelog em inglês e português do Brasil, com links entre as versões.
 - A pessoa pode escolher a cor de destaque entre seis opções e personalizar uma cor por HEX ou canais RGB. A escolha é local, se aplica aos temas do app e acompanha o backup de configurações; backups antigos usam `#4F46E5`.
 - Na lista de apps, os que estão habilitados para o filtro (`selected`) aparecem primeiro; cada grupo permanece em ordem alfabética e respeita a busca.
 - O editor de períodos permite selecionar vários dias da semana em ordem domingo a sábado (`D-S-T-Q-Q-S-S`) e aplica o mesmo horário a cada dia marcado.
@@ -49,7 +51,8 @@ Permitir que a pessoa configure períodos semanais de entrega por aplicativo And
 - Cor de destaque pronta ou personalizada persiste ao reabrir, atualiza os temas e sobrevive a exportação/importação de backup.
 - Um período multi-dia persiste como intervalos nativos por dia, preservando semântica noturna/24h.
 - Subjanelas no tema AMOLED usam fundo preto e campos com contorno legível.
-- A navegação chama de “Configurações” a tela de acesso, aparência, privacidade e backup; a interface e seletores Material usam pt-BR.
+- A navegação chama de “Configurações” a tela de acesso, aparência, privacidade e backup; a interface oferece inglês, pt-BR, espanhol, francês, alemão, italiano, japonês e chinês simplificado, seguindo o idioma do sistema ou a preferência local.
+- Todos os fluxos visíveis (início, apps, editor, exceções, configurações, diálogos, mensagens de erro e atualização) respeitam o idioma escolhido.
 - Ícone original aparece como ícone adaptativo Android com margem segura para as máscaras do launcher.
 - Nenhum corpo de notificação aparece em logs, backups, telemetria ou rede.
 - Automatizações unitárias e build são verificados; o relatório distingue resultados no emulador de dispositivos físicos/OEM não testados.

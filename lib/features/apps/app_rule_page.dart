@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../app/app_controller.dart';
 import '../../core/native/native_bridge.dart';
 import '../../core/ui/formatters.dart';
 import '../../core/ui/run_native_action.dart';
+import '../../l10n/app_localizations.dart';
 
 class AppRulePage extends StatefulWidget {
   const AppRulePage({
@@ -46,6 +48,7 @@ class _AppRulePageState extends State<AppRulePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: Text(widget.app.label)),
       body: ListView(
@@ -53,10 +56,8 @@ class _AppRulePageState extends State<AppRulePage> {
         children: [
           Card(
             child: SwitchListTile(
-              title: const Text('Aplicar horários a este app'),
-              subtitle: const Text(
-                'Sem horários definidos, as notificações chegam normalmente.',
-              ),
+              title: Text(l10n.applySchedulesToApp),
+              subtitle: Text(l10n.noSchedulesAllowNormally),
               value: _selected,
               onChanged: (value) => setState(() => _selected = value),
             ),
@@ -66,12 +67,12 @@ class _AppRulePageState extends State<AppRulePage> {
             children: [
               Expanded(
                 child: Text(
-                  'Períodos semanais',
+                  l10n.weeklyPeriods,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
               IconButton.filledTonal(
-                tooltip: 'Adicionar período',
+                tooltip: l10n.addPeriod,
                 onPressed: _addPeriod,
                 icon: const Icon(Icons.add),
               ),
@@ -79,12 +80,10 @@ class _AppRulePageState extends State<AppRulePage> {
           ),
           const SizedBox(height: 8),
           if (_periods.isEmpty)
-            const Card(
+            Card(
               child: Padding(
                 padding: EdgeInsets.all(16),
-                child: Text(
-                  'Ainda não há horários. As notificações deste app chegam normalmente.',
-                ),
+                child: Text(l10n.noPeriodsForApp),
               ),
             )
           else
@@ -97,12 +96,10 @@ class _AppRulePageState extends State<AppRulePage> {
                   leading: const Icon(Icons.schedule),
                   title: Text(_periodLabel(period)),
                   subtitle: period.startMinute == period.endMinute
-                      ? const Text(
-                          'Se início e fim forem iguais, o período dura 24 horas.',
-                        )
+                      ? Text(l10n.period24HoursHint)
                       : null,
                   trailing: IconButton(
-                    tooltip: 'Remover período',
+                    tooltip: l10n.removePeriod,
                     onPressed: () => setState(() => _periods.removeAt(index)),
                     icon: const Icon(Icons.delete_outline),
                   ),
@@ -116,24 +113,20 @@ class _AppRulePageState extends State<AppRulePage> {
             hasDraftIntervals: _periods.isNotEmpty,
           ),
           const SizedBox(height: 16),
-          Text('Exceções', style: Theme.of(context).textTheme.titleLarge),
+          Text(l10n.exceptions, style: Theme.of(context).textTheme.titleLarge),
           Card(
             child: Column(
               children: [
                 SwitchListTile(
-                  title: const Text('Permitir notificações de chamadas'),
-                  subtitle: const Text(
-                    'Só quando o app que enviou a notificação informa que é uma chamada.',
-                  ),
+                  title: Text(l10n.allowCallNotifications),
+                  subtitle: Text(l10n.callsCategoryOnly),
                   value: _allowCalls,
                   onChanged: (value) => setState(() => _allowCalls = value),
                 ),
                 const Divider(height: 1),
                 SwitchListTile(
-                  title: const Text('Permitir notificações de alarmes'),
-                  subtitle: const Text(
-                    'Só quando o app que enviou a notificação informa que é um alarme.',
-                  ),
+                  title: Text(l10n.allowAlarmNotifications),
+                  subtitle: Text(l10n.alarmsCategoryOnly),
                   value: _allowAlarms,
                   onChanged: (value) => setState(() => _allowAlarms = value),
                 ),
@@ -155,7 +148,7 @@ class _AppRulePageState extends State<AppRulePage> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.save_outlined),
-            label: const Text('Salvar horários'),
+            label: Text(l10n.saveSchedules),
           ),
         ],
       ),
@@ -191,8 +184,9 @@ class _AppRulePageState extends State<AppRulePage> {
     if (saved != null) {
       await widget.controller.refresh();
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Horários salvos.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.schedulesSaved)),
+        );
       }
     }
   }
@@ -210,6 +204,8 @@ class _AppRulePageState extends State<AppRulePage> {
   Future<_WeeklyPeriodDraft?> _showPeriodDialog({
     _WeeklyPeriodDraft? initial,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
+    final weekdays = _weekdays(context);
     final selectedDays = Set<int>.from(initial?.dayIndexes ?? const {0});
     var start = _timeOf(initial?.startMinute ?? 9 * 60);
     var end = _timeOf(initial?.endMinute ?? 17 * 60);
@@ -217,20 +213,20 @@ class _AppRulePageState extends State<AppRulePage> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text(initial == null ? 'Novo período' : 'Editar período'),
+          title: Text(initial == null ? l10n.newPeriod : l10n.editPeriod),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Dias em que as notificações podem chegar',
+                  l10n.allowedDays,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    for (final day in _weekdaysSundayFirst)
+                    for (final day in weekdays)
                       Expanded(
                         child: Tooltip(
                           message: day.fullName,
@@ -294,7 +290,7 @@ class _AppRulePageState extends State<AppRulePage> {
                 if (selectedDays.isEmpty) ...[
                   const SizedBox(height: 6),
                   Text(
-                    'Selecione pelo menos um dia.',
+                    l10n.selectAtLeastOneDay,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
                     ),
@@ -311,8 +307,8 @@ class _AppRulePageState extends State<AppRulePage> {
                     if (picked != null) setDialogState(() => start = picked);
                   },
                   child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Início',
+                    decoration: InputDecoration(
+                      labelText: l10n.startTime,
                       suffixIcon: Icon(Icons.access_time),
                     ),
                     child: Text(start.format(context)),
@@ -329,24 +325,22 @@ class _AppRulePageState extends State<AppRulePage> {
                     if (picked != null) setDialogState(() => end = picked);
                   },
                   child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Fim',
+                    decoration: InputDecoration(
+                      labelText: l10n.endTime,
                       suffixIcon: Icon(Icons.access_time),
                     ),
                     child: Text(end.format(context)),
                   ),
                 ),
                 const SizedBox(height: 14),
-                const Text(
-                  'O período pode terminar no dia seguinte. Se início e fim forem iguais, ele dura 24 horas.',
-                ),
+                Text(l10n.periodMayCrossMidnight),
               ],
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancelar'),
+              child: Text(l10n.cancel),
             ),
             FilledButton(
               onPressed: selectedDays.isEmpty
@@ -359,7 +353,7 @@ class _AppRulePageState extends State<AppRulePage> {
                         endMinute: end.hour * 60 + end.minute,
                       ),
                     ),
-              child: Text(initial == null ? 'Adicionar' : 'Salvar'),
+              child: Text(initial == null ? l10n.add : l10n.save),
             ),
           ],
         ),
@@ -392,9 +386,10 @@ class _AppRulePageState extends State<AppRulePage> {
   }
 
   String _periodLabel(_WeeklyPeriodDraft period) {
-    final days = _weekdaysSundayFirst
+    final localeName = Localizations.localeOf(context).toString();
+    final days = _weekdays(context)
         .where((day) => period.dayIndexes.contains(day.dayIndex))
-        .map((day) => formatDay(day.dayIndex))
+        .map((day) => formatDay(day.dayIndex, localeName: localeName))
         .join(', ');
     return '$days · ${formatMinute(period.startMinute)}–${formatMinute(period.endMinute)}';
   }
@@ -465,15 +460,25 @@ class _WeekdayOption {
   final String fullName;
 }
 
-const _weekdaysSundayFirst = [
-  _WeekdayOption(6, 'D', 'Domingo'),
-  _WeekdayOption(0, 'S', 'Segunda-feira'),
-  _WeekdayOption(1, 'T', 'Terça-feira'),
-  _WeekdayOption(2, 'Q', 'Quarta-feira'),
-  _WeekdayOption(3, 'Q', 'Quinta-feira'),
-  _WeekdayOption(4, 'S', 'Sexta-feira'),
-  _WeekdayOption(5, 'S', 'Sábado'),
-];
+List<_WeekdayOption> _weekdays(BuildContext context) {
+  final localeName = Localizations.localeOf(context).toString();
+  const sundayFirstIndexes = [6, 0, 1, 2, 3, 4, 5];
+  return [
+    for (final index in sundayFirstIndexes) _weekdayOption(index, localeName),
+  ];
+}
+
+_WeekdayOption _weekdayOption(int dayIndex, String localeName) {
+  final dayName = DateFormat.EEEE(localeName)
+      .format(DateTime(2024, 1, dayIndex + 1));
+  final runes = dayName.runes.toList(growable: false);
+  final initial = localeName.startsWith('zh') ? runes.last : runes.first;
+  return _WeekdayOption(
+    dayIndex,
+    String.fromCharCode(initial).toUpperCase(),
+    dayName,
+  );
+}
 
 class _EffectiveWindowsCard extends StatelessWidget {
   const _EffectiveWindowsCard({
@@ -486,6 +491,8 @@ class _EffectiveWindowsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toString();
     final grouped = <int, List<ScheduleWindowData>>{};
     for (final window in windows) {
       grouped.putIfAbsent(window.dayIndex, () => []).add(window);
@@ -497,26 +504,24 @@ class _EffectiveWindowsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Horários usados pelo filtro',
+              l10n.effectiveSchedule,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Períodos que se sobrepõem ou se encostam são agrupados. Os horários que você configurou continuam salvos.',
-            ),
+            Text(l10n.overlappingPeriodsGrouped),
             const SizedBox(height: 10),
             if (windows.isEmpty)
               Text(
                 hasDraftIntervals
-                    ? 'Salve para conferir como os períodos serão agrupados.'
-                    : 'Sem horários definidos, as notificações chegam normalmente.',
+                    ? l10n.saveToPreviewPeriods
+                    : l10n.noSchedulesNotificationsPass,
               )
             else
               ...grouped.entries.map(
                 (entry) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Text(
-                    '${formatDay(entry.key)}  ${entry.value.map((window) => '${formatMinute(window.startMinute)}–${formatMinute(window.endMinute)}').join(', ')}',
+                    '${formatDay(entry.key, localeName: localeName)}  ${entry.value.map((window) => '${formatMinute(window.startMinute)}–${formatMinute(window.endMinute)}').join(', ')}',
                   ),
                 ),
               ),
@@ -540,6 +545,8 @@ class _TemporaryExceptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toString();
     final until = untilEpochMillis;
     return Card(
       child: Padding(
@@ -548,25 +555,27 @@ class _TemporaryExceptionCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Exceção temporária',
+              l10n.temporaryException,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 6),
             Text(
               until != null && until > DateTime.now().millisecondsSinceEpoch
-                  ? 'Permitir até ${formatLocalDateTime(until)}'
-                  : 'Sem exceção ativa para este app.',
+                  ? l10n.allowUntil(
+                      formatLocalDateTime(until, localeName: localeName),
+                    )
+                  : l10n.noActiveExceptionForApp,
             ),
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
-                for (final option in const [
-                  (Duration(hours: 1), '1 hora'),
-                  (Duration(hours: 4), '4 horas'),
-                  (Duration(hours: 8), '8 horas'),
-                  (Duration(days: 1), '24 horas'),
+                for (final option in [
+                  (Duration(hours: 1), l10n.oneHour),
+                  (Duration(hours: 4), l10n.fourHours),
+                  (Duration(hours: 8), l10n.eightHours),
+                  (Duration(days: 1), l10n.twentyFourHours),
                 ])
                   OutlinedButton(
                     onPressed: () => onSet(option.$1),
@@ -576,7 +585,7 @@ class _TemporaryExceptionCard extends StatelessWidget {
                   TextButton.icon(
                     onPressed: onClear,
                     icon: const Icon(Icons.close),
-                    label: const Text('Remover'),
+                    label: Text(l10n.remove),
                   ),
               ],
             ),

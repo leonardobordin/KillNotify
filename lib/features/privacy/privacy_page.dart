@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/update/release_update_service.dart';
 import '../../core/ui/battery_requirement_card.dart';
 import '../../core/ui/run_native_action.dart';
+import '../../l10n/app_localizations.dart';
 
 class PrivacyPage extends StatelessWidget {
   const PrivacyPage({required this.controller, super.key});
@@ -14,12 +15,13 @@ class PrivacyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final snapshot = controller.snapshot;
     final accentColor = Color(
       snapshot?.accentColor ?? killNotifyAccent.toARGB32(),
     );
     return Scaffold(
-      appBar: AppBar(title: const Text('Configurações')),
+      appBar: AppBar(title: Text(l10n.tabSettings)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
@@ -30,11 +32,11 @@ class PrivacyPage extends StatelessWidget {
                     ? Icons.check_circle_outline
                     : Icons.lock_outline,
               ),
-              title: const Text('Acesso às notificações'),
+              title: Text(l10n.notificationAccess),
               subtitle: Text(
                 snapshot?.accessGranted == true
-                    ? 'Concedido nas configurações do Android.'
-                    : 'Necessário para filtrar notificações de outros apps.',
+                    ? l10n.accessGrantedInAndroid
+                    : l10n.accessRequiredToFilter,
               ),
               trailing: const Icon(Icons.open_in_new),
               onTap: () async {
@@ -57,16 +59,14 @@ class PrivacyPage extends StatelessWidget {
               children: [
                 SwitchListTile(
                   secondary: const Icon(Icons.system_update_outlined),
-                  title: const Text('Buscar atualizações automaticamente'),
-                  subtitle: const Text(
-                    'Consulta o GitHub no máximo uma vez por dia e avisa quando há uma nova versão.',
-                  ),
+                  title: Text(l10n.automaticUpdates),
+                  subtitle: Text(l10n.automaticUpdatesHint),
                   value: controller.automaticUpdateChecks,
                   onChanged: controller.setAutomaticUpdateChecks,
                 ),
                 ListTile(
                   leading: const Icon(Icons.refresh),
-                  title: const Text('Buscar atualização agora'),
+                  title: Text(l10n.checkForUpdateNow),
                   onTap: () =>
                       checkForUpdates(context: context, controller: controller),
                 ),
@@ -81,21 +81,77 @@ class PrivacyPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Aparência',
+                    l10n.appearance,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    initialValue: snapshot?.themeChoice ?? 'system',
-                    decoration: const InputDecoration(labelText: 'Tema'),
-                    items: const [
+                    key: ValueKey('language-${controller.languageChoice}'),
+                    initialValue: controller.languageChoice,
+                    decoration: InputDecoration(labelText: l10n.language),
+                    items: [
                       DropdownMenuItem(
                         value: 'system',
-                        child: Text('Seguir sistema'),
+                        child: Text(l10n.systemLanguage),
                       ),
-                      DropdownMenuItem(value: 'light', child: Text('Claro')),
-                      DropdownMenuItem(value: 'dark', child: Text('Escuro')),
-                      DropdownMenuItem(value: 'amoled', child: Text('AMOLED')),
+                      DropdownMenuItem(
+                        value: 'en',
+                        child: Text(l10n.languageEnglish),
+                      ),
+                      DropdownMenuItem(
+                        value: 'pt_BR',
+                        child: Text(l10n.languagePortugueseBrazil),
+                      ),
+                      DropdownMenuItem(
+                        value: 'es',
+                        child: Text(l10n.languageSpanish),
+                      ),
+                      DropdownMenuItem(
+                        value: 'fr',
+                        child: Text(l10n.languageFrench),
+                      ),
+                      DropdownMenuItem(
+                        value: 'de',
+                        child: Text(l10n.languageGerman),
+                      ),
+                      DropdownMenuItem(
+                        value: 'it',
+                        child: Text(l10n.languageItalian),
+                      ),
+                      DropdownMenuItem(
+                        value: 'ja',
+                        child: Text(l10n.languageJapanese),
+                      ),
+                      DropdownMenuItem(
+                        value: 'zh_CN',
+                        child: Text(l10n.languageChineseSimplified),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) controller.setLanguageChoice(value);
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  DropdownButtonFormField<String>(
+                    initialValue: snapshot?.themeChoice ?? 'system',
+                    decoration: InputDecoration(labelText: l10n.theme),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'system',
+                        child: Text(l10n.followSystem),
+                      ),
+                      DropdownMenuItem(
+                        value: 'light',
+                        child: Text(l10n.lightTheme),
+                      ),
+                      DropdownMenuItem(
+                        value: 'dark',
+                        child: Text(l10n.darkTheme),
+                      ),
+                      DropdownMenuItem(
+                        value: 'amoled',
+                        child: Text(l10n.amoledTheme),
+                      ),
                     ],
                     onChanged: (value) {
                       if (value != null) _setTheme(context, value);
@@ -103,7 +159,7 @@ class PrivacyPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   Text(
-                    'Cor de destaque',
+                    l10n.accentColor,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const SizedBox(height: 10),
@@ -114,7 +170,7 @@ class PrivacyPage extends StatelessWidget {
                     children: [
                       for (final color in _accentColors)
                         Semantics(
-                          label: 'Cor de destaque ${_hexColor(color)}',
+                          label: '${l10n.accentColor} ${_hexColor(color)}',
                           selected: accentColor.toARGB32() == color.toARGB32(),
                           button: true,
                           child: InkWell(
@@ -136,13 +192,13 @@ class PrivacyPage extends StatelessWidget {
                         onPressed: () =>
                             _pickCustomAccentColor(context, accentColor),
                         icon: const Icon(Icons.colorize_outlined),
-                        label: const Text('Personalizada'),
+                        label: Text(l10n.customColor),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Selecionada: ${_hexColor(accentColor)}',
+                    l10n.selectedColor(_hexColor(accentColor)),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -150,12 +206,9 @@ class PrivacyPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          Text('Backup local', style: Theme.of(context).textTheme.titleLarge),
+          Text(l10n.localBackup, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 6),
-          const Text(
-            'O arquivo de configurações contém regras, exceções e preferências. '
-            'Não contém conteúdo de notificações, mensagens ou ações.',
-          ),
+          Text(l10n.backupDescription),
           const SizedBox(height: 10),
           OutlinedButton.icon(
             onPressed: () async {
@@ -165,21 +218,18 @@ class PrivacyPage extends StatelessWidget {
               );
             },
             icon: const Icon(Icons.file_upload_outlined),
-            label: const Text('Exportar configurações'),
+            label: Text(l10n.exportSettings),
           ),
           FilledButton.tonalIcon(
             onPressed: () => _confirmImport(context),
             icon: const Icon(Icons.file_download_outlined),
-            label: const Text('Importar configurações'),
+            label: Text(l10n.importSettings),
           ),
           const SizedBox(height: 18),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(
-                'O KillNotify não tem conta nem envia dados pela internet. '
-                'O app é instalado manualmente e não é distribuído pela Play Store.',
-              ),
+              child: Text(l10n.noAccountPrivacy),
             ),
           ),
         ],
@@ -217,21 +267,20 @@ class PrivacyPage extends StatelessWidget {
   }
 
   Future<void> _confirmImport(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Importar backup?'),
-        content: const Text(
-          'A importação substitui as configurações atuais. O arquivo será validado antes de aplicar.',
-        ),
+        title: Text(l10n.importBackupTitle),
+        content: Text(l10n.importBackupWarning),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancelar'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Escolher arquivo'),
+            child: Text(l10n.chooseBackupFile),
           ),
         ],
       ),
@@ -246,33 +295,25 @@ class PrivacyPage extends StatelessWidget {
     if (!context.mounted) return;
     final messages = <String>[];
     if (imported.missingPackages.isNotEmpty) {
-      messages.add(
-        'Alguns apps do backup não estão instalados: ${imported.missingPackages.join(', ')}. Os horários foram preservados.',
-      );
+      messages.add(l10n.backupMissingApps(imported.missingPackages.join(', ')));
     }
     if (imported.accessRequired) {
-      messages.add(
-        'O filtro foi importado desativado porque falta o acesso às notificações.',
-      );
+      messages.add(l10n.importedWithoutNotificationAccess);
     }
     if (imported.batteryOptimizationRequired) {
-      messages.add(
-        'O filtro foi importado desativado porque falta permitir a atividade em segundo plano nas configurações de bateria.',
-      );
+      messages.add(l10n.importedWithoutBatteryExemption);
     }
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Backup importado'),
+        title: Text(l10n.backupImported),
         content: Text(
-          messages.isEmpty
-              ? 'As configurações foram validadas e aplicadas.'
-              : messages.join('\n\n'),
+          messages.isEmpty ? l10n.backupApplied : messages.join('\n\n'),
         ),
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('OK'),
+            child: Text(l10n.ok),
           ),
         ],
       ),
@@ -291,39 +332,24 @@ class _PrivacyExplanationCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'O que o acesso significa',
+            AppLocalizations.of(context)!.whatAccessMeans,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Esse acesso permite que o KillNotify decida se deve adiar cada notificação. '
-            'O app não lê nem guarda títulos, textos, contatos ou ações, e não envia essas informações para fora do aparelho.',
-          ),
+          Text(AppLocalizations.of(context)!.notificationAccessExplanation),
           const SizedBox(height: 14),
           Text(
-            'Visibilidade de apps instalados',
+            AppLocalizations.of(context)!.installedAppsVisibility,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Para você poder escolher qualquer app instalado, o Android mostra ao KillNotify a lista de apps do aparelho. '
-            'Ela é usada localmente e não é enviada para ninguém. Isso dá ao app acesso a mais informações sobre os apps instalados; '
-            'por esse motivo, a distribuição é manual pelo GitHub, fora da Play Store.',
-          ),
+          Text(AppLocalizations.of(context)!.installedAppsExplanation),
           const SizedBox(height: 14),
-          Text(
-            'Atualizações pelo GitHub',
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
+          Text('GitHub', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 6),
-          const Text(
-            'Com a busca automática ligada, o KillNotify consulta a API pública de releases do GitHub no máximo uma vez por dia. O GitHub recebe metadados normais da conexão, como o endereço IP; regras, apps escolhidos e notificações não são enviados. A instalação continua dependendo da confirmação do Android.',
-          ),
+          Text(AppLocalizations.of(context)!.githubUpdatesPrivacy),
           const SizedBox(height: 14),
-          const Text(
-            'Chamadas e alarmes só podem ser liberados automaticamente quando o próprio app os identifica dessa forma. '
-            'Códigos de verificação não têm identificação padronizada; o KillNotify não lê o conteúdo das mensagens para detectá-los.',
-          ),
+          Text(AppLocalizations.of(context)!.callsAlarmsOtpPrivacy),
         ],
       ),
     ),
@@ -368,80 +394,83 @@ class _AccentColorPickerDialogState extends State<_AccentColorPickerDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Cor personalizada'),
-    content: SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            height: 64,
-            decoration: BoxDecoration(
-              color: _color,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              _hexColor(_color),
-              style: TextStyle(
-                color: AppTheme.readableForeground(_color),
-                fontWeight: FontWeight.bold,
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(l10n.customColorTitle),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              height: 64,
+              decoration: BoxDecoration(
+                color: _color,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                _hexColor(_color),
+                style: TextStyle(
+                  color: AppTheme.readableForeground(_color),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _hexController,
-            maxLength: 6,
-            textCapitalization: TextCapitalization.characters,
-            decoration: InputDecoration(
-              labelText: 'Cor HEX',
-              prefixText: '#',
-              errorText: _hexError,
-              counterText: '',
+            const SizedBox(height: 16),
+            TextField(
+              controller: _hexController,
+              maxLength: 6,
+              textCapitalization: TextCapitalization.characters,
+              decoration: InputDecoration(
+                labelText: l10n.hexColor,
+                prefixText: '#',
+                errorText: _hexError,
+                counterText: '',
+              ),
+              onChanged: _onHexChanged,
             ),
-            onChanged: _onHexChanged,
-          ),
-          const SizedBox(height: 8),
-          Text('Vermelho: $_red'),
-          Slider(
-            value: _red.toDouble(),
-            min: 0,
-            max: 255,
-            divisions: 255,
-            activeColor: Colors.red,
-            onChanged: (value) => _updateChannel(red: value.round()),
-          ),
-          Text('Verde: $_green'),
-          Slider(
-            value: _green.toDouble(),
-            min: 0,
-            max: 255,
-            divisions: 255,
-            activeColor: Colors.green,
-            onChanged: (value) => _updateChannel(green: value.round()),
-          ),
-          Text('Azul: $_blue'),
-          Slider(
-            value: _blue.toDouble(),
-            min: 0,
-            max: 255,
-            divisions: 255,
-            activeColor: Colors.blue,
-            onChanged: (value) => _updateChannel(blue: value.round()),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(l10n.red(_red)),
+            Slider(
+              value: _red.toDouble(),
+              min: 0,
+              max: 255,
+              divisions: 255,
+              activeColor: Colors.red,
+              onChanged: (value) => _updateChannel(red: value.round()),
+            ),
+            Text(l10n.green(_green)),
+            Slider(
+              value: _green.toDouble(),
+              min: 0,
+              max: 255,
+              divisions: 255,
+              activeColor: Colors.green,
+              onChanged: (value) => _updateChannel(green: value.round()),
+            ),
+            Text(l10n.blue(_blue)),
+            Slider(
+              value: _blue.toDouble(),
+              min: 0,
+              max: 255,
+              divisions: 255,
+              activeColor: Colors.blue,
+              onChanged: (value) => _updateChannel(blue: value.round()),
+            ),
+          ],
+        ),
       ),
-    ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context),
-        child: const Text('Cancelar'),
-      ),
-      FilledButton(onPressed: _apply, child: const Text('Aplicar')),
-    ],
-  );
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(onPressed: _apply, child: Text(l10n.apply)),
+      ],
+    );
+  }
 
   void _updateChannel({int? red, int? green, int? blue}) {
     setState(() {
@@ -474,7 +503,9 @@ class _AccentColorPickerDialogState extends State<_AccentColorPickerDialog> {
 
   void _apply() {
     if (_parseHexColor(_hexController.text) == null) {
-      setState(() => _hexError = 'Informe 6 dígitos hexadecimais.');
+      setState(
+        () => _hexError = AppLocalizations.of(context)!.hexColorNeedsSixDigits,
+      );
       return;
     }
     Navigator.pop(context, _color);

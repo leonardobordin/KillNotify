@@ -4,6 +4,7 @@ import '../../app/app_controller.dart';
 import '../../core/native/native_bridge.dart';
 import '../../core/ui/formatters.dart';
 import '../../core/ui/run_native_action.dart';
+import '../../l10n/app_localizations.dart';
 
 class ExceptionsPage extends StatefulWidget {
   const ExceptionsPage({required this.controller, super.key});
@@ -41,6 +42,8 @@ class _ExceptionsPageState extends State<ExceptionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toString();
     final visibleApps = _apps
         .where((app) {
           final query = _query.toLowerCase().trim();
@@ -59,32 +62,32 @@ class _ExceptionsPageState extends State<ExceptionsPage> {
         .toList(growable: false);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Exceções temporárias')),
+      appBar: AppBar(title: Text(l10n.temporaryExceptions)),
       body: _loading && _apps.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
               children: [
-                const Card(
+                Card(
                   child: Padding(
                     padding: EdgeInsets.all(16),
-                    child: Text(
-                      'Permita notificações temporariamente para um ou vários apps. '
-                      'Essa permissão termina no horário escolhido, conforme o relógio do aparelho.',
-                    ),
+                    child: Text(l10n.temporaryExceptionsExplanation),
                   ),
                 ),
                 const SizedBox(height: 14),
-                Text('Duração', style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  l10n.duration,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
                   children: [
-                    for (final option in const [
-                      (Duration(hours: 1), '1 hora'),
-                      (Duration(hours: 4), '4 horas'),
-                      (Duration(hours: 8), '8 horas'),
-                      (Duration(days: 1), '24 horas'),
+                    for (final option in [
+                      (Duration(hours: 1), l10n.oneHour),
+                      (Duration(hours: 4), l10n.fourHours),
+                      (Duration(hours: 8), l10n.eightHours),
+                      (Duration(days: 1), l10n.twentyFourHours),
                     ])
                       ChoiceChip(
                         label: Text(option.$2),
@@ -97,16 +100,16 @@ class _ExceptionsPageState extends State<ExceptionsPage> {
                         Icons.edit_calendar_outlined,
                         size: 18,
                       ),
-                      label: const Text('Escolher horário'),
+                      label: Text(l10n.chooseTime),
                       onPressed: _chooseCustomEnd,
                     ),
                   ],
                 ),
                 const SizedBox(height: 14),
                 TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     prefixIcon: Icon(Icons.search),
-                    labelText: 'Buscar apps',
+                    labelText: l10n.searchApp,
                   ),
                   onChanged: (value) => setState(() => _query = value),
                 ),
@@ -115,7 +118,7 @@ class _ExceptionsPageState extends State<ExceptionsPage> {
                   children: [
                     Expanded(
                       child: Text(
-                        '${_selectedPackages.length} selecionados',
+                        l10n.selectedAppsCount(_selectedPackages.length),
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ),
@@ -125,11 +128,11 @@ class _ExceptionsPageState extends State<ExceptionsPage> {
                           _selectedPackages.add(app.packageName);
                         }
                       }),
-                      child: const Text('Selecionar resultados'),
+                      child: Text(l10n.selectResults),
                     ),
                     TextButton(
                       onPressed: () => setState(_selectedPackages.clear),
-                      child: const Text('Limpar'),
+                      child: Text(l10n.clear),
                     ),
                   ],
                 ),
@@ -149,9 +152,9 @@ class _ExceptionsPageState extends State<ExceptionsPage> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         subtitle: app.isSystemApp
-                            ? const Text('App do sistema')
+                            ? Text(l10n.systemApp)
                             : !app.hasLauncherActivity
-                            ? const Text('Sem ícone na tela inicial')
+                            ? Text(l10n.noLauncherIcon)
                             : null,
                         onChanged: (selected) => setState(() {
                           if (selected == true) {
@@ -169,20 +172,20 @@ class _ExceptionsPageState extends State<ExceptionsPage> {
                   onPressed: _selectedPackages.isEmpty ? null : _applyException,
                   icon: const Icon(Icons.notifications_active_outlined),
                   label: Text(
-                    'Permitir ${_selectedPackages.length} apps temporariamente',
+                    l10n.allowAppsTemporarily(_selectedPackages.length),
                   ),
                 ),
                 const SizedBox(height: 22),
                 Text(
-                  'Permissões temporárias ativas',
+                  l10n.activeTemporaryExceptions,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 8),
                 if (active.isEmpty)
-                  const Card(
+                  Card(
                     child: Padding(
                       padding: EdgeInsets.all(16),
-                      child: Text('Nenhuma exceção temporária ativa.'),
+                      child: Text(l10n.noTemporaryExceptions),
                     ),
                   )
                 else
@@ -192,15 +195,26 @@ class _ExceptionsPageState extends State<ExceptionsPage> {
                       child: ListTile(
                         leading: const Icon(Icons.timer_outlined),
                         title: Text(
-                          appLabels[rule.packageName] ?? 'App não encontrado',
+                          appLabels[rule.packageName] ?? l10n.appNotFound,
                         ),
                         subtitle: Text(
                           appLabels.containsKey(rule.packageName)
-                              ? 'Até ${formatLocalDateTime(until)}'
-                              : 'Até ${formatLocalDateTime(until)} · Identificador: ${rule.packageName}',
+                              ? l10n.untilTime(
+                                  formatLocalDateTime(
+                                    until,
+                                    localeName: localeName,
+                                  ),
+                                )
+                              : l10n.untilTimeWithIdentifier(
+                                  formatLocalDateTime(
+                                    until,
+                                    localeName: localeName,
+                                  ),
+                                  rule.packageName,
+                                ),
                         ),
                         trailing: IconButton(
-                          tooltip: 'Encerrar exceção',
+                          tooltip: l10n.endException,
                           onPressed: () => _clearException(rule.packageName),
                           icon: const Icon(Icons.close),
                         ),
@@ -236,7 +250,7 @@ class _ExceptionsPageState extends State<ExceptionsPage> {
     final duration = end.difference(DateTime.now());
     if (duration <= Duration.zero) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Escolha um horário futuro.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.chooseFutureTime)),
       );
       return;
     }
@@ -258,7 +272,12 @@ class _ExceptionsPageState extends State<ExceptionsPage> {
       await widget.controller.refresh();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Exceção aplicada a ${packages.length} apps.')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!
+                .exceptionAppliedCount(packages.length),
+          ),
+        ),
       );
     }
   }

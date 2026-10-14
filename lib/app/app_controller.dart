@@ -13,6 +13,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   static const _automaticUpdatesKey = 'github_automatic_update_checks';
   static const _lastUpdateCheckKey = 'github_last_update_check_ms';
   static const _updateSnoozedUntilKey = 'github_update_snoozed_until_ms';
+  static const _languageChoiceKey = 'app_language_choice';
   static const updateCheckInterval = Duration(hours: 24);
 
   final NativeBridge bridge;
@@ -21,6 +22,7 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
   Object? loadError;
   bool loading = true;
   bool automaticUpdateChecks = true;
+  String languageChoice = 'system';
   DateTime? _lastUpdateCheckAt;
   DateTime? _updateSnoozedUntil;
   Future<void>? _updatePreferencesLoad;
@@ -42,6 +44,8 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
     try {
       automaticUpdateChecks =
           await _preferences.getBool(_automaticUpdatesKey) ?? true;
+      languageChoice =
+          await _preferences.getString(_languageChoiceKey) ?? 'system';
       final lastCheckMillis = await _preferences.getInt(_lastUpdateCheckKey);
       final snoozedUntilMillis = await _preferences.getInt(
         _updateSnoozedUntilKey,
@@ -56,6 +60,16 @@ class AppController extends ChangeNotifier with WidgetsBindingObserver {
       // Update checks are optional and must not block the notification filter.
     }
     notifyListeners();
+  }
+
+  Future<void> setLanguageChoice(String choice) async {
+    languageChoice = choice;
+    notifyListeners();
+    try {
+      await _preferences.setString(_languageChoiceKey, choice);
+    } on Object {
+      // The language choice remains active in memory for this app session.
+    }
   }
 
   Future<void> setAutomaticUpdateChecks(bool enabled) async {

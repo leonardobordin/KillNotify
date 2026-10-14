@@ -1,4 +1,4 @@
-const portugueseWeekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+import 'package:intl/intl.dart';
 
 String formatMinute(int minute) {
   final normalized = minute % (24 * 60);
@@ -7,18 +7,13 @@ String formatMinute(int minute) {
   return '$hour:$value';
 }
 
-String formatLocalDateTime(int epochMillis) {
+String formatLocalDateTime(int epochMillis, {required String localeName}) {
   final value = DateTime.fromMillisecondsSinceEpoch(epochMillis).toLocal();
-  final date =
-      '${value.day.toString().padLeft(2, '0')}/'
-      '${value.month.toString().padLeft(2, '0')}/${value.year}';
-  final time =
-      '${value.hour.toString().padLeft(2, '0')}:'
-      '${value.minute.toString().padLeft(2, '0')}';
-  return '$date às $time';
+  return DateFormat.yMd(localeName).add_jm().format(value);
 }
 
-String formatDay(int dayIndex) =>
-    dayIndex >= 0 && dayIndex < portugueseWeekdays.length
-    ? portugueseWeekdays[dayIndex]
-    : 'Dia';
+String formatDay(int dayIndex, {required String localeName}) {
+  if (dayIndex < 0 || dayIndex > 6) return '—';
+  // Schedule day indexes are Monday=0 through Sunday=6.
+  return DateFormat.E(localeName).format(DateTime(2024, 1, dayIndex + 1));
+}

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/theme/app_theme.dart';
 import '../core/update/release_update_service.dart';
@@ -9,6 +8,7 @@ import '../features/apps/apps_page.dart';
 import '../features/exceptions/exceptions_page.dart';
 import '../features/home/home_page.dart';
 import '../features/privacy/privacy_page.dart';
+import '../l10n/app_localizations.dart';
 import 'app_controller.dart';
 
 class KillNotifyApp extends StatefulWidget {
@@ -48,11 +48,31 @@ class _KillNotifyAppState extends State<KillNotifyApp> {
           'dark' || 'amoled' => ThemeMode.dark,
           _ => ThemeMode.system,
         };
+        final locale = switch (_controller.languageChoice) {
+          'en' => const Locale('en'),
+          'pt_BR' => const Locale('pt', 'BR'),
+          'es' => const Locale('es'),
+          'fr' => const Locale('fr'),
+          'de' => const Locale('de'),
+          'it' => const Locale('it'),
+          'ja' => const Locale('ja'),
+          'zh_CN' => const Locale('zh', 'CN'),
+          _ => null,
+        };
         return MaterialApp(
           title: 'KillNotify',
-          locale: const Locale('pt', 'BR'),
-          supportedLocales: const [Locale('pt', 'BR')],
-          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          locale: locale,
+          supportedLocales: const [
+            Locale('en'),
+            Locale('pt', 'BR'),
+            Locale('es'),
+            Locale('fr'),
+            Locale('de'),
+            Locale('it'),
+            Locale('ja'),
+            Locale('zh', 'CN'),
+          ],
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           theme: AppTheme.light(accentColor: accentColor),
           darkTheme: choice == 'amoled'
               ? AppTheme.amoled(accentColor: accentColor)
@@ -109,26 +129,26 @@ class _KillNotifyShellState extends State<KillNotifyShell> {
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) =>
             setState(() => _selectedIndex = index),
-        destinations: const [
+        destinations: [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),
-            label: 'Início',
+            label: AppLocalizations.of(context)!.tabHome,
           ),
           NavigationDestination(
             icon: Icon(Icons.apps_outlined),
             selectedIcon: Icon(Icons.apps),
-            label: 'Apps',
+            label: AppLocalizations.of(context)!.tabApps,
           ),
           NavigationDestination(
             icon: Icon(Icons.schedule_outlined),
             selectedIcon: Icon(Icons.schedule),
-            label: 'Exceções',
+            label: AppLocalizations.of(context)!.tabExceptions,
           ),
           NavigationDestination(
             icon: Icon(Icons.settings_outlined),
             selectedIcon: Icon(Icons.settings),
-            label: 'Configurações',
+            label: AppLocalizations.of(context)!.tabSettings,
           ),
         ],
       ),

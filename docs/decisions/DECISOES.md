@@ -182,3 +182,13 @@ Acrescente decisões ao final; mudanças devem substituir explicitamente a anter
 - Alternativas consideradas: consultar o GitHub em cada abertura; download/instalação silenciosa; armazenar token de GitHub; enviar telemetria ou dados do app.
 - Efeito: o app passa a solicitar `INTERNET` apenas para consulta pública de releases. O GitHub recebe metadados da conexão (incluindo IP e User-Agent com versão), mas não recebe regras, apps configurados ou dados de notificações. Publicar um APK para testes/updates requer uma release assinada com a mesma chave permanente; a primeira versão será enviada como código ao branch `main`, sem criar release/tag nesta etapa.
 - Origem: pedido explícito do usuário, estrutura de atualização do KillQR, API pública de releases do GitHub e limite de instalação de APK no Android.
+
+## D019 — Idiomas do app e documentação pública
+
+- Estado: confirmada pelo usuário
+- Data: 2026-10-14
+- Contexto: após a publicação inicial, o usuário observou que faltavam idiomas e pediu que o GitHub de KillNotify ficasse mais próximo do KillQR; confirmou que quer a interface do app e a documentação multilíngues.
+- Decisão: oferecer inglês, português do Brasil, espanhol, francês, alemão, italiano, japonês e chinês simplificado, seguir o idioma do sistema por padrão e permitir seleção persistente em Configurações. Manter README e changelog em inglês e português do Brasil; README principal em inglês com links para pt-BR.
+- Alternativas consideradas: traduzir somente README (não cobre o pedido de interface) ou manter pt-BR forçado.
+- Efeito: todas as mensagens do app, incluindo erros, datas, diálogos e atualizações, usam `AppLocalizations`; preferência de idioma fica local e fora do backup de regras.
+- Origem: pedido do usuário e comparação com a experiência multilíngue do KillQR.

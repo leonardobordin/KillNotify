@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/app_controller.dart';
 import '../../core/native/native_bridge.dart';
 import '../../core/ui/run_native_action.dart';
+import '../../l10n/app_localizations.dart';
 import 'app_rule_page.dart';
 
 class AppsPage extends StatefulWidget {
@@ -47,6 +48,7 @@ class _AppsPageState extends State<AppsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final snapshot = widget.controller.snapshot;
     final rules = snapshot?.rulesByPackage ?? const <String, AppRuleView>{};
     final filtered = _apps.where((app) {
@@ -73,10 +75,10 @@ class _AppsPageState extends State<AppsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Aplicativos'),
+        title: Text(l10n.tabApps),
         actions: [
           IconButton(
-            tooltip: 'Atualizar lista',
+            tooltip: l10n.refreshAppList,
             onPressed: _loadApps,
             icon: const Icon(Icons.refresh),
           ),
@@ -91,11 +93,11 @@ class _AppsPageState extends State<AppsPage> {
                   controller: _searchController,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.search),
-                    labelText: 'Buscar aplicativo',
+                    labelText: l10n.searchApp,
                     suffixIcon: _query.isEmpty
                         ? null
                         : IconButton(
-                            tooltip: 'Limpar busca',
+                            tooltip: l10n.clearSearch,
                             onPressed: () {
                               _searchController.clear();
                               setState(() => _query = '');
@@ -106,23 +108,17 @@ class _AppsPageState extends State<AppsPage> {
                   onChanged: (value) => setState(() => _query = value),
                 ),
                 const SizedBox(height: 12),
-                const Card(
+                Card(
                   child: Padding(
                     padding: EdgeInsets.all(14),
-                    child: Text(
-                      'A lista também inclui apps do sistema e apps sem ícone na tela inicial. '
-                      'O Android pode não permitir filtrar notificações de perfis de trabalho '
-                      'ou de alguns serviços.',
-                    ),
+                    child: Text(l10n.appsListDisclosure),
                   ),
                 ),
                 const SizedBox(height: 8),
                 if (filtered.isEmpty)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.all(24),
-                    child: Center(
-                      child: Text('Nenhum app corresponde à busca.'),
-                    ),
+                    child: Center(child: Text(l10n.noSearchMatch)),
                   )
                 else
                   ...filtered.map((app) {
@@ -130,10 +126,9 @@ class _AppsPageState extends State<AppsPage> {
                     final selected = rule?.selected ?? false;
                     final intervalCount = rule?.intervals.length ?? 0;
                     final details = <String>[
-                      if (app.isSystemApp) 'App do sistema',
-                      if (!app.hasLauncherActivity) 'Sem ícone na tela inicial',
-                      if (intervalCount > 0)
-                        '$intervalCount ${intervalCount == 1 ? 'período' : 'períodos'} definidos',
+                      if (app.isSystemApp) l10n.systemApp,
+                      if (!app.hasLauncherActivity) l10n.noLauncherIcon,
+                      if (intervalCount > 0) l10n.periodsDefined(intervalCount),
                     ];
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8),
@@ -162,24 +157,22 @@ class _AppsPageState extends State<AppsPage> {
                 if (missingRules.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   Text(
-                    'Apps não instalados',
+                    l10n.uninstalledApps,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Os horários foram preservados e voltam a valer se o app for instalado novamente.',
-                  ),
+                  Text(l10n.schedulesPreserved),
                   const SizedBox(height: 8),
                   ...missingRules.map(
                     (rule) => Card(
                       child: ListTile(
                         leading: const Icon(Icons.warning_amber_outlined),
-                        title: const Text('App não encontrado'),
+                        title: Text(l10n.appNotFound),
                         subtitle: Text(
-                          'Identificador: ${rule.packageName}. Os horários serão mantidos se o app voltar a ser instalado.',
+                          '${l10n.packageIdentifier(rule.packageName)}. ${l10n.schedulesPreserved}',
                         ),
                         trailing: IconButton(
-                          tooltip: 'Remover regra',
+                          tooltip: l10n.removeRule,
                           onPressed: () => _removeRule(rule.packageName),
                           icon: const Icon(Icons.delete_outline),
                         ),

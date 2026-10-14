@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/app_controller.dart';
 import '../native/native_bridge.dart';
 import 'run_native_action.dart';
+import '../../l10n/app_localizations.dart';
 
 class BatteryRequirementCard extends StatelessWidget {
   const BatteryRequirementCard({
@@ -16,17 +17,18 @@ class BatteryRequirementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final granted = snapshot.batteryOptimizationExempt;
     final manufacturerHelp = switch (snapshot.manufacturerFamily) {
-      'samsung' => 'Em Samsung, adicione o KillNotify em Configurações > Bateria e assistência do aparelho > Bateria > Limites de uso em segundo plano > Apps nunca suspensos. Os nomes podem variar conforme a versão.',
-      'xiaomi' => 'Em Xiaomi, ative a Inicialização automática em segundo plano em Configurações > Apps > Permissões. Se houver a opção, escolha Sem restrições em Bateria para o KillNotify. Os nomes variam conforme o modelo.',
-      'huawei' => 'Em Huawei, procure “Inicialização de apps”, escolha o KillNotify e permita Inicialização automática, Inicialização secundária e Executar em segundo plano. Os nomes variam por versão.',
-      'realme' => 'Em realme, procure Gerenciamento de bateria dos apps nas configurações e permita atividade em segundo plano e inicialização automática para o KillNotify, se essas opções estiverem disponíveis.',
-      'oppo' => 'Em OPPO/ColorOS, alguns modos de economia limitam apps em segundo plano. Procure nas configurações de Bateria ou Apps a gestão de bateria do KillNotify e permita a atividade em segundo plano, se disponível.',
-      'oneplus' => 'Em OnePlus, confira Configurações > Bateria > Mais configurações > Gerenciamento de bateria de apps. Verifique se a atividade em segundo plano do KillNotify não está restrita; o texto e o caminho podem variar.',
-      'vivo' => 'Em vivo, procure Configurações > Apps > Acesso especial a apps > Inicialização automática e permita o KillNotify, se essa opção estiver disponível.',
-      'motorola' => 'Em Motorola, se o aparelho tiver Gerenciar apps em segundo plano, escolha Sempre permitir para o KillNotify. Os nomes e a disponibilidade variam por modelo.',
-      _ => 'Alguns aparelhos oferecem controles próprios para apps em segundo plano. Se ainda houver interrupções, procure as opções de bateria do KillNotify nas configurações do aparelho.',
+      'samsung' => l10n.batteryHelpSamsung,
+      'xiaomi' => l10n.batteryHelpXiaomi,
+      'huawei' => l10n.batteryHelpHuawei,
+      'realme' => l10n.batteryHelpRealme,
+      'oppo' => l10n.batteryHelpOppo,
+      'oneplus' => l10n.batteryHelpOneplus,
+      'vivo' => l10n.batteryHelpVivo,
+      'motorola' => l10n.batteryHelpMotorola,
+      _ => l10n.batteryHelpOther,
     };
 
     return Card(
@@ -50,14 +52,14 @@ class BatteryRequirementCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Permitir atividade em segundo plano',
+                        l10n.backgroundActivityTitle,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         granted
-                            ? 'A permissão de bateria do Android está ativa.'
-                            : 'Necessário para ativar o filtro e acompanhar as notificações com a tela apagada.',
+                            ? l10n.batteryExemptionGranted
+                            : l10n.batteryExemptionNeeded,
                       ),
                     ],
                   ),
@@ -74,14 +76,14 @@ class BatteryRequirementCard extends StatelessWidget {
                   );
                 },
                 icon: const Icon(Icons.battery_saver_outlined),
-                label: const Text('Ajustar bateria'),
+                label: Text(l10n.adjustBattery),
               ),
             ],
             const SizedBox(height: 12),
             Text(manufacturerHelp),
             const SizedBox(height: 8),
             Text(
-              'Não é necessário deixar o KillNotify aberto na tela. Evite usar “Forçar parada”; isso interrompe o acompanhamento até o Android reconectar o serviço.',
+              l10n.noNeedKeepScreenOpen,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],

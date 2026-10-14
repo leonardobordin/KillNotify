@@ -5,6 +5,7 @@ import '../../core/native/native_bridge.dart';
 import '../../core/ui/battery_requirement_card.dart';
 import '../../core/ui/formatters.dart';
 import '../../core/ui/run_native_action.dart';
+import '../../l10n/app_localizations.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({
@@ -18,13 +19,14 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final snapshot = controller.snapshot;
     return Scaffold(
       appBar: AppBar(
         title: const Text('KillNotify'),
         actions: [
           IconButton(
-            tooltip: 'Atualizar estado',
+            tooltip: l10n.refreshStatus,
             onPressed: controller.refresh,
             icon: const Icon(Icons.refresh),
           ),
@@ -63,14 +65,12 @@ class HomePage extends StatelessWidget {
               Card(
                 child: ListTile(
                   leading: const Icon(Icons.notifications_active_outlined),
-                  title: const Text('Notificações liberadas hoje'),
+                  title: Text(l10n.notificationsReleasedToday),
                   trailing: Text(
                     '${snapshot.releasedCountToday}',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  subtitle: const Text(
-                    'Contagem neste aparelho; mensagens e ações não são salvas.',
-                  ),
+                  subtitle: Text(l10n.notificationCountPrivacy),
                 ),
               ),
               const SizedBox(height: 12),
@@ -78,11 +78,9 @@ class HomePage extends StatelessWidget {
                 child: ListTile(
                   leading: const Icon(Icons.apps),
                   title: Text(
-                    '${_configuredCount(snapshot)} apps com horários',
+                    l10n.configuredAppsCount(_configuredCount(snapshot)),
                   ),
-                  subtitle: const Text(
-                    'Cada app pode ter seus próprios horários.',
-                  ),
+                  subtitle: Text(l10n.eachAppHasOwnSchedule),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: onOpenApps,
                 ),
@@ -108,35 +106,36 @@ class _StatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final (icon, title, subtitle, color) = switch (snapshot.state) {
       'active' => (
         Icons.verified_outlined,
-        'Filtro ativo',
-        'O KillNotify está aplicando os horários configurados.',
+        l10n.filterActive,
+        l10n.filterActiveExplanation,
         Theme.of(context).colorScheme.primary,
       ),
       'waiting_for_listener' => (
         Icons.hourglass_top,
-        'Filtro inativo',
-        'O KillNotify ainda não está acompanhando as notificações. Algumas podem chegar sem adiamento.',
+        l10n.filterInactive,
+        l10n.listenerNotFollowing,
         Theme.of(context).colorScheme.tertiary,
       ),
       'needs_battery_optimization' => (
         Icons.battery_alert,
-        'Ajuste a bateria para continuar',
-        'Permita a atividade do KillNotify em segundo plano para ativar o filtro.',
+        l10n.batterySetupRequired,
+        l10n.batterySetupExplanation,
         Theme.of(context).colorScheme.tertiary,
       ),
       'configuration_error' => (
         Icons.error_outline,
-        'Horários indisponíveis',
-        'O filtro está desligado até que suas configurações sejam recuperadas.',
+        l10n.schedulesUnavailable,
+        l10n.schedulesUnavailableExplanation,
         Theme.of(context).colorScheme.error,
       ),
       _ => (
         Icons.pause_circle_outline,
-        'Filtro desativado',
-        'As notificações chegam normalmente, sem adiamento.',
+        l10n.filterDisabled,
+        l10n.notificationsArriveNormally,
         Theme.of(context).colorScheme.secondary,
       ),
     };
@@ -186,15 +185,13 @@ class _NotificationAccessCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text(
-                'Acesso necessário',
+                AppLocalizations.of(context)!.accessNeeded,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Para aplicar os horários, permita que o KillNotify acompanhe as notificações nas configurações do Android.',
-          ),
+          Text(AppLocalizations.of(context)!.notificationAccessNeeded),
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: () async {
@@ -204,7 +201,7 @@ class _NotificationAccessCard extends StatelessWidget {
               );
             },
             icon: const Icon(Icons.settings),
-            label: const Text('Abrir configurações do Android'),
+            label: Text(AppLocalizations.of(context)!.openAndroidSettings),
           ),
         ],
       ),
@@ -221,15 +218,15 @@ class _FilterControlCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
     child: SwitchListTile(
-      title: const Text('Ativar filtro'),
+      title: Text(AppLocalizations.of(context)!.activateFilter),
       subtitle: Text(
         !snapshot.accessGranted && !snapshot.batteryOptimizationExempt
-            ? 'Libere o acesso às notificações e ajuste a bateria antes de ativar.'
+            ? AppLocalizations.of(context)!.filterNeedsBoth
             : !snapshot.accessGranted
-            ? 'Permita o acesso às notificações antes de ativar.'
+            ? AppLocalizations.of(context)!.filterNeedsAccess
             : !snapshot.batteryOptimizationExempt
-            ? 'Ajuste a bateria para o filtro funcionar em segundo plano.'
-            : 'Aplica os horários definidos para cada app.',
+            ? AppLocalizations.of(context)!.filterNeedsBattery
+            : AppLocalizations.of(context)!.filterAppliesSchedules,
       ),
       value: snapshot.filterEnabled,
       onChanged: !snapshot.accessGranted || !snapshot.batteryOptimizationExempt
@@ -253,11 +250,9 @@ class _StorageErrorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
     color: Theme.of(context).colorScheme.errorContainer,
-    child: const Padding(
+    child: Padding(
       padding: EdgeInsets.all(16),
-      child: Text(
-        'Importe um backup na tela Privacidade para recuperar seus horários.',
-      ),
+      child: Text(AppLocalizations.of(context)!.restoreBackupForSchedules),
     ),
   );
 }
@@ -283,7 +278,9 @@ class _LoadingCard extends StatelessWidget {
           const SizedBox(width: 14),
           Expanded(
             child: Text(
-              error == null ? 'Verificando o filtro…' : 'Não foi possível verificar o filtro. Toque em atualizar e tente novamente.',
+              error == null
+                  ? AppLocalizations.of(context)!.checkingFilter
+                  : AppLocalizations.of(context)!.cannotCheckFilter,
             ),
           ),
         ],
@@ -299,23 +296,25 @@ class _NextWindowCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toString();
     final epoch = snapshot.nextAllowedStartEpochMillis;
     final hasConfiguredRules = snapshot.appRules.any(
       (rule) => rule.selected && rule.intervals.isNotEmpty,
     );
     final title = epoch != null
         ? snapshot.filterActive
-              ? 'Próximo início permitido'
-              : 'Próxima janela configurada'
+              ? l10n.nextAllowedStart
+              : l10n.nextConfiguredWindow
         : hasConfiguredRules
-        ? 'Nenhum app aguarda horário agora'
-        : 'Ainda sem horários configurados';
+        ? l10n.noAppWaiting
+        : l10n.noSchedulesYet;
     final detail = epoch != null
-        ? '${formatLocalDateTime(epoch)}'
-              '${snapshot.filterActive ? '' : '\nO filtro está inativo; horário informativo.'}'
+        ? '${formatLocalDateTime(epoch, localeName: localeName)}'
+              '${snapshot.filterActive ? '' : '\n${l10n.filterInactiveInformative}'}'
         : hasConfiguredRules
-        ? 'Os horários seguem o fuso configurado no aparelho.'
-        : 'Escolha os apps e defina quando as notificações podem chegar.';
+        ? l10n.timezoneInfo
+        : l10n.chooseAppsAndPeriods;
     return Card(
       child: ListTile(
         leading: const Icon(Icons.event_available_outlined),
@@ -335,8 +334,7 @@ class _LimitationCard extends StatelessWidget {
     child: Padding(
       padding: const EdgeInsets.all(16),
       child: Text(
-        'O Android controla quando uma notificação adiada volta a aparecer. '
-        'O horário pode variar por economia de bateria, configurações do aparelho ou mudanças no relógio.',
+        AppLocalizations.of(context)!.androidControlsSnooze,
         style: Theme.of(context).textTheme.bodyMedium,
       ),
     ),
