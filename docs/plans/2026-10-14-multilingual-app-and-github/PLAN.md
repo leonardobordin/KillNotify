@@ -2,13 +2,13 @@
 
 ## Estado de retomada
 
-- Fase: publicação do código
-- Etapa atual: registrar e enviar as alterações ao branch `main`
-- Concluído: oito idiomas e fallback do sistema, seletor persistente, textos e datas localizados, README/changelog EN e pt-BR, requisitos/arquitetura/D019 atualizados; análise limpa, APK debug compilado e troca EN↔pt-BR + iniciais D-S-T-Q-Q-S-S conferidas no emulador
-- Pendências: commit e push
+- Fase: concluída
+- Etapa atual: entrega publicada no branch `main`
+- Concluído: oito idiomas e fallback do sistema, seletor persistente, textos e datas localizados, README/changelog EN e pt-BR, requisitos/arquitetura/D019 atualizados; análise limpa, APK debug compilado e troca EN↔pt-BR + iniciais D-S-T-Q-Q-S-S conferidas no emulador; commit `8d7047b` enviado ao GitHub
+- Pendências: nenhuma
 - Arquivos alterados: ARB e Dart em `lib/`, README/changelog, `pubspec`, configuração l10n e documentação
 - Última validação: `flutter gen-l10n`, `flutter analyze` sem problemas e `flutter build apk --debug` concluídos; APK instalado no emulador API 36; telas verificadas em inglês e pt-BR e o seletor semanal mostra D-S-T-Q-Q-S-S
-- Próxima ação: commit e push do estado revisado
+- Próxima ação: aguardar eventual feedback do usuário
 
 ## Objetivo e problema
 
@@ -56,7 +56,7 @@ O app e a página pública do GitHub estão somente em português, enquanto o Ki
 - [x] Modo sistema segue locale do Android e cai para inglês quando não houver tradução.
 - [x] Textos visíveis, diálogos, erros, datas, permissões e updater não ficam misturados em português ao escolher outro idioma.
 - [x] README em inglês aponta ao pt-BR e vice-versa; changelogs também têm versões nos dois idiomas.
-- [ ] `flutter analyze` e build debug passam; branch `main` remoto recebe as mudanças.
+- [x] `flutter analyze` e build debug passam; branch `main` remoto recebe as mudanças.
 
 ## Validação
 
