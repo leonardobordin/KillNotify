@@ -2,13 +2,13 @@
 
 ## Estado de retomada
 
-- Fase: validação
-- Etapa atual: revisar arquivos públicos, criar commit inicial e enviar ao `main`
-- Concluído: verificador, controles em Configurações, declaração de rede e explicação de privacidade, workflow de release por tag, documentação, análise, build e instalação/conferência no emulador
-- Pendências: validar uma release real depois de ser publicada; initial commit/push ainda pendentes
+- Fase: concluído
+- Etapa atual: commit inicial enviado ao branch `main`
+- Concluído: verificador e controles em Configurações; declaração de rede e explicação de privacidade; workflow de release por tag; documentação; APK debug analisado, compilado, instalado e conferido; commit/push inicial ao GitHub
+- Pendências: criar/configurar os quatro secrets de assinatura e publicar uma release assinada antes de validar uma atualização real
 - Arquivos alterados: código Flutter, manifesto, workflow, README, privacidade, releasing, requisitos, arquitetura, decisões, prompt, AGENTS e plano
-- Última validação: `flutter analyze` limpo; `flutter build apk --debug` passou; Settings aberto no AVD API 36 com a opção automática ligada
-- Próxima ação: confirmar staged files excluem cache/SDK/keystore; commit inicial e push para o remoto vazio
+- Última validação: `flutter analyze` sem apontamentos; `flutter build apk --debug` passou; Configurações conferido no AVD API 36; `origin/main` corresponde ao commit `a3136226fe4fcd38ef96531a69829112c7b3c369`
+- Próxima ação: configurar secrets de assinatura no GitHub e, quando quiser distribuir o primeiro APK, enviar a tag `v1.0.0`
 
 ## Objetivo e problema
 
@@ -61,7 +61,7 @@ Publicar o código-fonte KillNotify no repositório vazio do usuário e permitir
 - [x] Baixar abre o asset APK/release oficial e deixa a confirmação para Android.
 - [x] Configuração e horários de filtro não são enviados; somente a chamada pública de atualização alcança GitHub.
 - [x] Workflow de tag usa assinatura persistente de secrets; nenhum secret/keystore é incluído nem release publicada agora.
-- [ ] Commit inicial está em `main` no URL indicado e inclui o projeto, sem arquivos de build/segredos.
+- [x] Commit inicial está em `main` no URL indicado e inclui o projeto, sem arquivos de build/segredos.
 
 ## Validação
 
@@ -70,6 +70,7 @@ Publicar o código-fonte KillNotify no repositório vazio do usuário e permitir
 - `flutter build apk --debug`
 - Revisar exclusões do `.gitignore` e procurar keystores/propriedades locais antes de `git add`.
 - Emulador API 36: app instalado, página Configurações aberta; a opção de busca automática aparece ligada por padrão. O repositório ainda não tem uma release para validar um aviso de atualização real.
+- Git remoto: branch `main` atualizado e SHA conferido após push.
 - Confirmar SHA do `main` remoto após push.
 - Não executar testes automatizados sem pedido explícito.
 - Não há release no repositório vazio, então a detecção positiva de uma nova versão só poderá ser validada quando uma release APK for publicada.
