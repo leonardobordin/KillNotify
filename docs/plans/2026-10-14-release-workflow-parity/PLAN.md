@@ -2,13 +2,13 @@
 
 ## Estado de retomada
 
-- Fase: validação e publicação do código
-- Etapa atual: revisar diff final e enviar ao branch `main`
-- Concluído: workflow alinhado ao KillQR, notas versionadas EN/PT-BR, documentação e D020; YAML parseado, `flutter gen-l10n`, formatação e análise passaram
-- Pendências: commit/push e conferir `origin/main`
+- Fase: concluída
+- Etapa atual: alterações enviadas ao branch `main`
+- Concluído: workflow alinhado ao KillQR, notas versionadas EN/PT-BR, documentação e D020; YAML parseado, `flutter gen-l10n`, formatação e análise passaram; commit `94be33e` enviado
+- Pendências: nenhuma nesta alteração; uma publicação requer secrets de assinatura e uma tag criada pelo proprietário
 - Arquivos alterados: workflow, changelogs, guia de release, requisitos, arquitetura, decisão D020 e plano
 - Última validação: parser YAML aceitou `.github/workflows/release.yml`; `flutter gen-l10n` e `dart format --output=none --set-exit-if-changed lib test` passaram; `flutter analyze` sem problemas. `flutter test` não foi executado localmente; está no workflow para a próxima tag
-- Próxima ação: concluir revisão, commit e push; nenhuma tag/release será criada nesta tarefa
+- Próxima ação: aguardar feedback; nenhuma tag/release foi criada nesta tarefa
 
 ## Objetivo e problema
 
@@ -55,7 +55,7 @@ O KillNotify já cria uma GitHub Release ao receber uma tag SemVer, mas o workfl
 - [x] Localizações, formatação, análise e testes estão configurados antes do build.
 - [x] Release anexa APK assinado, SHA-256 e notas da seção da versão no changelog, ou nome/versão como fallback.
 - [x] Guia e changelogs em EN/PT-BR descrevem o processo sem sugerir que uma release já foi publicada.
-- [ ] Workflow/JSON/YAML e diff passam nas verificações; commit é enviado ao branch `main`.
+- [x] Workflow YAML e diff passam nas verificações; commit é enviado ao branch `main`.
 
 ## Validação
 
